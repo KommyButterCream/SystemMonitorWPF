@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SystemMonitor — WPF 학습 프로젝트 기획서</title>
+<style>
+:root{--bg:#0c1424;--panel:#142139;--line:#2a3c59;--text:#e8effc;--muted:#a9bbd5;--accent:#78dcca;--normal:#64dbb2;--warn:#ffce70;--danger:#ff8794}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.8 'Segoe UI','Malgun Gothic',sans-serif}header,main,footer{max-width:1120px;margin:auto;padding:38px 28px}header{padding-top:70px}h1{font-size:clamp(32px,5vw,54px);line-height:1.25;margin:12px 0 24px}h2{font-size:27px;margin:0 0 22px}h3{font-size:19px;margin:25px 0 10px}p{margin:10px 0}a{color:var(--accent)}.eyebrow{letter-spacing:.15em;color:var(--accent);font-size:13px;font-weight:700}.lead{font-size:20px;max-width:850px;color:var(--muted)}.tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:25px}.tags span{padding:4px 12px;border:1px solid var(--line);border-radius:20px;font-size:13px}nav{display:flex;flex-wrap:wrap;gap:10px 22px;margin:32px 0}section{padding:32px;background:var(--panel);border:1px solid var(--line);border-radius:18px;margin-bottom:24px;scroll-margin-top:20px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:22px}.muted,small{color:var(--muted)}.value{font-size:36px;font-weight:700;line-height:1.5}.normal{color:var(--normal)}.warn{color:var(--warn)}.danger{color:var(--danger)}.meter{height:7px;background:var(--line);border-radius:8px;margin:12px 0}.meter i{display:block;height:100%;background:currentColor;border-radius:8px}.note{border-left:3px solid var(--accent);padding:12px 18px;background:#102b35;margin:18px 0}.table-wrap{overflow:auto}table{border-collapse:collapse;width:100%;font-size:14px;margin:18px 0}th,td{text-align:left;padding:13px 12px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--accent);white-space:nowrap}code,pre{font-family:Consolas,monospace}code{color:#b5e8ff;overflow-wrap:anywhere}pre{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:22px;overflow:auto;font-size:14px;line-height:1.7}li{margin:6px 0}.step{border-top:1px solid var(--line);padding:18px 0}.step:first-of-type{border-top:0}.step h3{margin:0 0 8px}.step b{color:var(--accent)}.flow{display:flex;align-items:stretch;flex-wrap:wrap;gap:10px;margin:24px 0}.flow div{flex:1;min-width:130px;background:var(--bg);padding:16px;border:1px solid var(--line);border-radius:10px}.flow strong{display:block;color:var(--accent)}footer{font-size:13px;color:var(--muted);padding-bottom:60px}@media(max-width:740px){.grid{grid-template-columns:1fr}section{padding:22px}header,main,footer{padding-left:18px;padding-right:18px}th,td{min-width:110px}}@media print{body{background:white;color:#17243a;font-size:11pt}header,main,footer{max-width:none;padding:12px}section,.card,pre,.flow div{background:white;color:#17243a;border-color:#ccc;border-radius:0}section{break-inside:auto}h2,h3{break-after:avoid}a,code,th,.eyebrow,.step b,.flow strong{color:#155b77}.muted,.lead,small,footer{color:#455568}.note{background:#eef6f7}nav{display:none}.card,.step,table{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+<div class="eyebrow">LEARN · DESIGN · BUILD / PROJECT 01</div>
+<h1>내 PC를 읽는 대시보드,<br>WPF로 한 단계씩.</h1>
+<p class="lead">CPU 카드 하나에서 시작해 GPU와 RAM까지 확장하는 SystemMonitor 개발 기획서. C# 문법, WPF 화면 구성, MVVM의 역할을 직접 타이핑하며 익히는 프로젝트입니다.</p>
+<div class="tags"><span>작성 2026.10.26</span><span>Windows · C# · WPF</span><span>CPU → RAM → GPU</span><span>학습 중심 설계 v1.0</span></div>
+<nav aria-label="목차"><a href="#goal">목표</a><a href="#preview">화면 구상</a><a href="#architecture">구조</a><a href="#classes">클래스 설계</a><a href="#steps">학습 단계</a><a href="#policy">측정·상태 규칙</a><a href="#lesson">수업 방식</a><a href="#sources">참고 자료</a></nav>
+</header>
+<main>
+<section id="goal"><h2>01 / 무엇을 만들고, 무엇을 배우는가</h2>
+<p><strong>제품 목표:</strong> CPU·GPU·RAM 사용량과 읽을 수 있는 온도를 약 1초 간격으로 표시하고, 사용자가 정한 임계값에 따라 정상·주의·위험 상태를 보여주는 Windows 데스크톱 앱을 만듭니다.</p>
+<p><strong>학습 목표:</strong> “이 코드를 어느 파일에 쓰는가”에서 출발해, 화면과 데이터 수집을 왜 분리하는지 설명하고 새 장치 카드를 스스로 추가할 수 있는 수준에 도달합니다.</p>
+<div class="table-wrap"><table><thead><tr><th>범위</th><th>완성 기준</th></tr></thead><tbody>
+<tr><td>첫 번째 작은 완성</td><td>가상 CPU 사용량이 화면에 표시되고 값 변경 시 바인딩으로 갱신됩니다.</td></tr>
+<tr><td>CPU MVP</td><td>실제 CPU 전체 사용량과 지원되는 대표 온도, 갱신 상태, 임계값별 색상, 설정 저장·복원이 동작합니다. 온도 미지원 PC에서는 사유를 표시합니다.</td></tr>
+<tr><td>최종 기본 버전</td><td>RAM 물리 메모리 사용량 및 GPU별 사용량·온도를 확장합니다. RAM 온도는 센서가 있는 경우에만 제공합니다. 장치 하나의 실패가 전체 화면을 멈추지 않습니다.</td></tr>
+<tr><td>후속 과제</td><td>시계열 그래프, CSV 기록, 트레이, 시작 프로그램, 알림, 설치 패키지는 기본 버전 이후에 다룹니다.</td></tr>
+</tbody></table></div>
+<div class="note">선생님은 설계·코드 설명·수정 위치 안내·리뷰를 담당하고, 학습자는 앱 코드를 직접 작성합니다. 이 문서는 개발 계획이며 앱 구현 코드는 변경하지 않습니다.</div>
+<h3>현재 출발점과 개발 환경</h3>
+<p>현재 <code>SystemMonitor.sln</code>에는 WPF 프로젝트 하나가 있습니다. <code>SystemMonitor.csproj</code>는 <code>net9.0-windows</code>이며 Nullable과 ImplicitUsings가 활성화되어 있습니다. <code>MainWindow.xaml</code>은 비어 있는 Grid이고, App.xaml의 StartupUri가 MainWindow를 엽니다. 로컬에서 확인한 SDK는 <code>9.0.317</code>입니다.</p>
+<p>장기 학습 기준은 <strong>.NET 10 LTS</strong>를 권장합니다. Microsoft 지원 정책상 .NET 9 지원 종료는 2026년 11월 10일, .NET 10은 2028년 11월 14일입니다. Step 0에서 IDE의 .NET 10 지원과 SDK 설치 여부를 확인한 뒤 대상을 전환합니다. 당장 환경 변경이 어려우면 현재 .NET 9로 기본 바인딩 수업을 먼저 진행하고 실제 센서 연동 전 전환을 점검합니다. <a href="https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core">공식 지원 정책</a></p>
+</section>
+<section id="preview"><h2>02 / 완성 화면의 방향</h2>
+<p class="muted">아래는 최종 레이아웃 구상입니다. 숫자는 설명용 고정 예시이며 실제 PC 측정값이 아닙니다.</p>
+<div class="grid">
+<div class="card"><span class="eyebrow">CPU · 전체</span><div class="value normal">32.4 <small>%</small></div><div class="meter normal"><i style="width:32.4%"></i></div><p>사용량 <span class="normal">정상</span></p><p>대표 온도 <strong>54 °C</strong> · 정상</p><small>마지막 갱신 14:32:08</small></div>
+<div class="card"><span class="eyebrow">RAM · 물리 메모리</span><div class="value warn">72.0 <small>%</small></div><div class="meter warn"><i style="width:72%"></i></div><p>사용량 <span class="warn">주의</span></p><p>23.0 / 32.0 GiB</p><small>온도 — 미지원</small></div>
+<div class="card"><span class="eyebrow">GPU · 선택한 장치</span><div class="value danger">93.0 <small>%</small></div><div class="meter danger"><i style="width:93%"></i></div><p>사용량 <span class="danger">위험</span></p><p>대표 온도 <strong>76 °C</strong> · 주의</p><small>센서: GPU Core</small></div>
+</div>
+<p>상단에는 앱 제목·수집 상태·시작/중지·설정 버튼을 둡니다. 본문에는 장치 카드를 배치하고 하단에는 마지막 성공 시각과 간단한 오류를 표시합니다. 첫 수업에서는 CPU 카드 하나와 TextBlock만 만듭니다.</p>
+<p>사용량과 온도는 각각 상태를 표시합니다. 카드의 종합 상태는 유효한 지표 중 가장 높은 단계로 정하되, 온도 미지원 등 데이터 상태도 따로 보입니다. 색상 외에 “정상/주의/위험/확인 불가” 텍스트를 함께 사용합니다.</p>
+</section>
+<section id="architecture"><h2>03 / 시스템 구조와 MVVM</h2>
+<p><strong>MVVM은 역할을 나누는 약속입니다.</strong> View는 화면, Model은 데이터, ViewModel은 화면에 보여줄 데이터와 동작을 담당합니다. 실제 PC를 읽는 코드는 Service로 분리합니다. MVVM은 폴더 세 개를 만드는 일보다 책임을 분리하는 데 의미가 있습니다.</p>
+<div class="flow"><div><strong>① PC 센서</strong>CPU · RAM · GPU</div><div><strong>② Service → Model</strong>센서 읽기<br>측정 결과 반환</div><div><strong>③ ViewModel</strong>값·상태 갱신<br>변경 알림</div><div><strong>④ View</strong>Binding으로 표시<br>Style로 색상 결정</div></div>
+<div class="table-wrap"><table><thead><tr><th>역할</th><th>프로젝트에서 하는 일</th><th>넣지 않을 책임</th></tr></thead><tbody>
+<tr><td>View / XAML</td><td>Grid, TextBlock, ProgressBar, Binding, DataTrigger</td><td>센서 탐색, 임계값 계산</td></tr>
+<tr><td>ViewModel</td><td>표시할 값, Command, 수집 흐름 조정, 변경 알림</td><td>라이브러리 센서 이름 탐색, 파일 입출력 상세</td></tr>
+<tr><td>Model</td><td>측정값, 단위, 시각, 상태, 설정</td><td>Brush, Window 등 WPF 화면 타입</td></tr>
+<tr><td>Service</td><td>하드웨어 접근, 상태 판정, 설정 저장</td><td>화면 컨트롤 직접 변경</td></tr>
+</tbody></table></div>
+<h3>인터페이스가 필요한 이유</h3>
+<p><code>IMonitoringService</code>는 “측정 결과를 제공한다”는 계약입니다. 가상 값을 만드는 <code>FakeMonitoringService</code>와 실제 PC를 읽는 <code>HardwareMonitoringService</code>가 같은 계약을 구현하면, 화면 코드를 바꾸지 않고 수집 방법을 교체할 수 있습니다. 초반에는 생성자에 서비스 객체를 직접 전달하는 방식으로 의존성 주입을 배웁니다. DI 컨테이너·Prism·여러 계층 프로젝트는 나중으로 미룹니다.</p>
+<h3>WPF 시작과 종료 흐름</h3>
+<p>처음에는 기존 StartupUri를 유지하고 MainWindow 생성자에서 DataContext를 한 번 연결합니다. 실제 수집 단계에서는 App.xaml.cs를 객체 조립의 시작점으로 옮깁니다. 이때 StartupUri를 제거하고 App에서 서비스 → ViewModel → MainWindow를 만들어 창을 한 번만 엽니다. 창 종료 시 수집 취소 → 진행 중 읽기 종료 대기 → 센서 닫기·해제 순서를 지킵니다.</p>
+<p>뷰 이벤트를 연결하거나 창 생명주기를 전달하는 소량의 코드 비하인드는 허용합니다. 계산과 센서 접근은 ViewModel·Service에 둡니다.</p>
+</section>
+<section id="classes"><h2>04 / 폴더와 클래스 설계</h2>
+<p>단일 WPF 프로젝트 안에서 시작합니다. 아래는 도착할 구조이며, 해당 수업이 오기 전에는 파일을 미리 만들지 않습니다.</p>
+<pre>SystemMonitor/
+├─ App.xaml / App.xaml.cs          시작·객체 조립·종료
+├─ MainWindow.xaml / .xaml.cs      초기 대시보드 View
+├─ Models/
+│  ├─ MetricReading.cs            값·단위·시각·데이터 상태
+│  ├─ DeviceSnapshot.cs           장치 한 개의 측정 결과
+│  ├─ ThresholdRule.cs            주의·위험 경계값
+│  ├─ MonitorSettings.cs          장치별 설정·갱신 간격
+│  └─ MonitorEnums.cs             장치 종류·데이터 상태·경보 단계
+├─ ViewModels/
+│  ├─ ViewModelBase.cs            INotifyPropertyChanged
+│  ├─ MainViewModel.cs            수집 조정·카드 목록
+│  ├─ DeviceCardViewModel.cs       공통 장치 카드
+│  └─ SettingsViewModel.cs        설정 편집·입력 검증
+├─ Services/
+│  ├─ IMonitoringService.cs
+│  ├─ FakeMonitoringService.cs
+│  ├─ HardwareMonitoringService.cs
+│  ├─ ThresholdEvaluator.cs
+│  ├─ ISettingsService.cs
+│  └─ JsonSettingsService.cs
+├─ Commands/RelayCommand.cs       버튼 → ViewModel 동작
+├─ Views/SettingsWindow.xaml      설정 창
+└─ Resources/DashboardStyles.xaml 공통 스타일·상태 색상</pre>
+<div class="table-wrap"><table><thead><tr><th>클래스 / 계약</th><th>핵심 내용</th><th>도입 시점</th></tr></thead><tbody>
+<tr><td>ViewModelBase</td><td>INotifyPropertyChanged 구현. 값이 바뀌면 WPF에 알려줍니다. SetProperty&lt;T&gt;는 기본 알림을 이해한 후 추가합니다.</td><td>Step 2</td></tr>
+<tr><td>MainViewModel</td><td>처음에는 CpuUsage 하나. 이후 시작·중지 Command, 수집 상태, 카드 목록을 소유합니다.</td><td>Step 2부터 확장</td></tr>
+<tr><td>MetricReading</td><td>double? Value, Unit, Timestamp, DataStatus, Reason. 미지원과 실제 0을 구분합니다.</td><td>Step 3</td></tr>
+<tr><td>DeviceSnapshot</td><td>DeviceId, DisplayName, DeviceKind, Usage, Temperature. RAM 단계에서 UsedBytes·TotalBytes를 추가합니다. 센서 식별 정보도 기록합니다.</td><td>Step 3</td></tr>
+<tr><td>IMonitoringService</td><td>초기화, 한 번 읽기, 해제를 계약으로 정의합니다. ReadAsync(CancellationToken)는 장치 결과 목록을 반환합니다. 처음에는 CPU 하나만 반환합니다.</td><td>Step 3</td></tr>
+<tr><td>FakeMonitoringService</td><td>정해진 값 순서와 미지원·오류 시나리오를 반환합니다. 무작위 값보다 경계 검증에 유리합니다.</td><td>Step 3</td></tr>
+<tr><td>HardwareMonitoringService</td><td>LibreHardwareMonitor Computer를 한 번 열고 재사용합니다. 센서 갱신·매핑과 동기화, 종료 해제를 담당합니다.</td><td>Step 5</td></tr>
+<tr><td>ThresholdRule / Evaluator</td><td>Warning·Critical과 Evaluate(value, rule). 숫자를 Normal·Warning·Critical로 판정하는 순수 로직입니다.</td><td>Step 4</td></tr>
+<tr><td>DeviceCardViewModel</td><td>측정 결과에서 표시 문자열, 사용량/온도별 경보 단계, 데이터 상태를 만듭니다. Brush 대신 enum을 노출합니다.</td><td>Step 7</td></tr>
+<tr><td>SettingsViewModel</td><td>편집용 사본, 검증 오류, 저장·취소 Command. 유효한 설정만 실행 중 대시보드에 적용합니다.</td><td>Step 6</td></tr>
+<tr><td>ISettingsService / JsonSettingsService</td><td>설정 읽기·저장 계약과 JSON 구현. 사용자 LocalApplicationData 아래 SystemMonitor/settings.json에 저장합니다.</td><td>Step 6</td></tr>
+</tbody></table></div>
+<div class="note">화면 표시 이름은 SystemMonitor로 두어도 됩니다. C# 이름이 외부 라이브러리의 SystemMonitor 타입과 충돌한다면 명시적 네임스페이스나 별칭을 사용합니다. 추상화를 추가할 때마다 “어떤 교체나 검증을 쉽게 하는가”를 확인합니다.</div>
+</section>
+<section id="steps"><h2>05 / 단계별 수업 로드맵</h2>
+<p>각 단계는 여러 짧은 수업으로 나눕니다. 완료 기준을 직접 확인하고, 코드가 동작하는 이유를 설명한 뒤 다음으로 넘어갑니다.</p>
+<div class="step"><h3>Step 0 · 실행 환경과 프로젝트 읽기</h3><p><b>배울 것</b> 솔루션과 프로젝트, SDK와 대상 프레임워크, 빌드·실행, XAML과 코드 비하인드의 관계.</p><p><b>작성 위치</b> 먼저 기존 App.xaml, MainWindow.xaml, .csproj를 읽습니다. 환경 확인 후 필요할 때만 대상 프레임워크를 수정합니다.</p><p><b>완료 기준</b> 빈 창 실행 성공. App에서 MainWindow가 열리는 경로와 빌드 오류를 찾는 방법을 설명할 수 있습니다.</p></div>
+<div class="step"><h3>Step 1 · 정적인 CPU 카드</h3><p><b>배울 것</b> Grid 행·열, Margin/Padding, TextBlock, ProgressBar, 기본 C# 타입과 속성 개념.</p><p><b>작성 위치</b> MainWindow.xaml. CPU 제목, 고정된 25.0%, 사용량 막대만 만듭니다.</p><p><b>완료 기준</b> 창 크기를 바꿔도 CPU 카드가 읽기 좋게 보이고, 각 XAML 속성의 역할을 설명합니다.</p></div>
+<div class="step"><h3>Step 2 · MVVM과 바인딩 첫 연결</h3><p><b>배울 것</b> 클래스·객체·필드·속성, 생성자, DataContext, Binding, 이벤트, INotifyPropertyChanged.</p><p><b>작성 위치</b> ViewModelBase.cs, MainViewModel.cs 생성. MainWindow.xaml의 고정 숫자를 Binding으로 바꾸고 생성자에서 DataContext를 연결합니다.</p><p><b>완료 기준</b> ViewModel의 CpuUsage 값을 바꾸면 숫자와 막대가 함께 갱신됩니다. 변경 알림을 잠시 빼서 왜 화면이 갱신되지 않는지도 확인합니다.</p></div>
+<div class="step"><h3>Step 3 · 가상 데이터와 주기 갱신</h3><p><b>배울 것</b> interface, 구현, 생성자 주입, nullable, Task, async/await, CancellationToken, UI 스레드.</p><p><b>작성 위치</b> Models와 IMonitoringService, FakeMonitoringService 생성. MainViewModel에 시작·중지 흐름을 추가하고 RelayCommand를 작성합니다.</p><p><b>완료 기준</b> 약 1초마다 가상 값이 바뀌며 중지하면 멈춥니다. 시작을 여러 번 눌러도 루프는 하나입니다. 닫을 때 수집이 종료됩니다.</p></div>
+<div class="step"><h3>Step 4 · 임계값 판정과 색상</h3><p><b>배울 것</b> enum, 조건문, 순수 함수, WPF Style·DataTrigger, 표시와 계산 분리.</p><p><b>작성 위치</b> ThresholdRule, ThresholdEvaluator를 만들고 MainWindow 리소스에 상태별 스타일을 추가합니다. 처음에는 고정 임계값을 사용합니다.</p><p><b>완료 기준</b> 69.9 → 70 → 89.9 → 90%에서 정상·주의·주의·위험으로 바뀝니다. 숫자가 없으면 회색 “확인 불가”이며 0%로 바꾸지 않습니다.</p></div>
+<div class="step"><h3>Step 5 · 실제 CPU 센서로 교체 — 첫 MVP</h3><p><b>배울 것</b> NuGet, 외부 라이브러리 캡슐화, 센서 트리, IDisposable, 예외·권한 처리.</p><p><b>작성 위치</b> HardwareMonitoringService 생성. App.xaml.cs에서 실제 서비스를 조립하도록 변경합니다. 설치할 LibreHardwareMonitorLib 버전은 이 수업에서 호환성을 확인하고 고정합니다.</p><p><b>완료 기준</b> CPU 전체 사용량과 대표 온도가 갱신됩니다. 센서 ID·종류·이름을 진단으로 확인하고, 권한 부족·미지원은 구분해 표시합니다. 온도 부재로 사용량까지 사라지지 않습니다.</p></div>
+<div class="step"><h3>Step 6 · 설정과 저장</h3><p><b>배울 것</b> TwoWay 바인딩, 입력 검증, ICommand, JSON 직렬화, 파일 입출력.</p><p><b>작성 위치</b> MonitorSettings, SettingsViewModel, SettingsWindow, ISettingsService와 JsonSettingsService를 만듭니다.</p><p><b>완료 기준</b> 임계값·갱신 간격 저장 후 재실행해 복원됩니다. 잘못된 값은 저장되지 않으며 취소는 기존 설정을 유지합니다. 저장 실패·깨진 JSON을 화면에서 안내합니다.</p></div>
+<div class="step"><h3>Step 7 · RAM 추가와 카드 공통화</h3><p><b>배울 것</b> 리팩터링, ObservableCollection, ItemsControl, DataTemplate, 재사용 리소스.</p><p><b>작성 위치</b> DeviceCardViewModel 생성, CPU 전용 바인딩을 카드 목록으로 전환. 실제 서비스에 RAM 매핑 추가. 공통 스타일을 Resources로 이동합니다.</p><p><b>완료 기준</b> CPU와 RAM이 같은 템플릿으로 표시됩니다. RAM 사용률과 사용량/전체 GiB가 일관되며 미지원 온도는 숨기거나 명확히 표시합니다.</p></div>
+<div class="step"><h3>Step 8 · GPU 확장</h3><p><b>배울 것</b> 여러 장치 식별, 센서 매핑 정책, 장치별 설정 키.</p><p><b>작성 위치</b> HardwareMonitoringService의 GPU 탐색과 설정 매핑 확장. CPU 화면 코드는 재작성하지 않습니다.</p><p><b>완료 기준</b> 내장·외장 GPU를 각각 식별하고 카드로 표시합니다. GPU가 없거나 센서가 일부 누락돼도 나머지 카드는 계속 동작합니다.</p></div>
+<div class="step"><h3>Step 9 · 안정성과 최종 점검</h3><p><b>배울 것</b> 문제 재현, 핵심 로직 테스트, 로그, 자원 수명 관리.</p><p><b>작성 위치</b> 실제로 필요한 로직에 한해 테스트 프로젝트를 추가합니다. 임계값 경계·설정 검증·센서 누락 매핑을 검증합니다.</p><p><b>완료 기준</b> 30분 연속 실행, 시작/중지 반복, 설정 복원, 센서 실패, 종료 중 읽기를 확인합니다. 대시보드 자체의 CPU·메모리 사용량도 관찰합니다.</p></div>
+</section>
+<section id="policy"><h2>06 / 측정·스레드·상태 규칙</h2>
+<h3>실제 센서 공급자</h3>
+<p>초기 후보는 <strong>LibreHardwareMonitorLib</strong>입니다. CPU·GPU·메모리 등의 센서를 지원하는 오픈소스 라이브러리이며, 일부 센서에는 관리자 권한이 필요합니다. 지원 목록이 모든 PC에서 모든 수치를 보장하지는 않습니다. 실제 연동 시 PC에서 노출되는 센서를 먼저 조사합니다. 라이브러리의 공식 설명과 배포 시 라이선스·고지 파일도 함께 확인합니다. <a href="https://github.com/LibreHardwareMonitor/LibreHardwareMonitor">공식 저장소</a></p>
+<p>처음부터 관리자 실행을 강제하지 않습니다. 일반 권한에서 읽을 수 있는 항목을 표시하고, 실패 원인을 기록합니다. 필요한 센서만 권한 때문에 누락되는지 실제 PC에서 확인한 후 실행 정책을 결정합니다.</p>
+<div class="table-wrap"><table><thead><tr><th>지표</th><th>선택·표시 정책</th></tr></thead><tbody>
+<tr><td>CPU 사용량</td><td>전체 CPU 부하 센서를 선택합니다. 코어별 값 하나를 전체로 쓰지 않습니다. 도구별 샘플링·계산 방식 차이로 작업 관리자와 정확히 일치하지 않을 수 있습니다.</td></tr>
+<tr><td>CPU 온도</td><td>패키지/다이 대표 센서를 우선합니다. 없으면 확인된 코어 온도 중 최대값을 대체값으로 표시하고 출처를 밝힙니다. 첫 번째 온도 센서를 무조건 선택하지 않습니다.</td></tr>
+<tr><td>RAM</td><td>시스템 물리 메모리 사용량과 전체량을 기준으로 비율을 계산합니다. 가상 메모리·GPU 메모리와 구분합니다. 표시 단위 GiB = bytes / 1024³. 모듈 온도 센서가 노출되지 않으면 미지원입니다.</td></tr>
+<tr><td>GPU</td><td>장치별 대표 코어 부하와 코어 온도를 선택합니다. 엔진별 사용률을 무작정 합하지 않고, 핫스폿·메모리 온도는 별도 지표로 남깁니다. ID를 저장해 이름이 같은 GPU도 구분합니다.</td></tr>
+</tbody></table></div>
+<h3>주기 수집과 UI 갱신</h3>
+<ol><li>기본 간격은 1,000ms, 설정 가능한 범위는 학습용 정책으로 500~5,000ms로 둡니다. 하드 실시간 보장 대신 주기적인 화면 갱신을 목표로 합니다.</li><li>초반 가상 값은 가벼운 UI 타이머로 설명할 수 있습니다. 실제 수집 단계에서는 취소 가능한 비동기 루프 하나와 PeriodicTimer를 사용하고, 이전 읽기가 끝나기 전에 새 읽기를 겹치지 않습니다.</li><li>동기 센서 호출은 백그라운드에서 실행하고 서비스 접근은 직렬화합니다. async라는 이름만 붙여 UI 정지가 해결됐다고 판단하지 않습니다.</li><li>읽기가 끝나면 Dispatcher를 통해 카드 속성과 컬렉션을 UI 스레드에서 갱신합니다. 수집 시간도 관찰하고 느린 경우 화면을 막지 않습니다. <a href="https://learn.microsoft.com/en-us/dotnet/desktop/wpf/advanced/threading-model">WPF 스레딩 모델</a></li><li>창 종료 시 CancellationToken으로 다음 수집을 막습니다. 취소 토큰이 이미 실행 중인 동기 센서 호출을 강제 중단하지는 않으므로, 그 호출 종료 후 Computer.Close/Dispose를 수행합니다.</li></ol>
+<h3>데이터 상태와 경보 단계는 다릅니다</h3>
+<p><code>DataStatus</code>는 Pending(수집 전), Available(유효), Unsupported(미지원), Error(실패), Stale(오래된 값)을 나타냅니다. <code>AlertLevel</code>은 Unknown, Normal, Warning, Critical입니다. 유효한 수치에만 임계값을 적용합니다.</p>
+<p>처음에는 “수집 중…”을 표시합니다. 읽기 실패 시 마지막 성공 값과 시각을 남기되 “이전 값”임을 표시하고 현재 경보는 확인 불가로 전환합니다. 수집 중 마지막 성공 이후 현재 갱신 간격의 3배가 지나면 Stale로 판정합니다. 의도적으로 중지했다면 “중지됨”을 표시합니다. 오류 시 무한 팝업 대신 카드와 하단 상태를 갱신합니다.</p>
+<h3>임계값 정책</h3>
+<div class="table-wrap"><table><thead><tr><th>지표</th><th>정상</th><th>주의</th><th>위험</th></tr></thead><tbody><tr><td>사용량 예시</td><td>70% 미만</td><td>70% 이상, 90% 미만</td><td>90% 이상</td></tr><tr><td>온도 예시</td><td>75°C 미만</td><td>75°C 이상, 85°C 미만</td><td>85°C 이상</td></tr></tbody></table></div>
+<p>위 수치는 UI 학습을 위한 초기값입니다. 하드웨어의 안전 한계가 아니며 장치 사양에 맞춰 조정합니다. CPU·GPU·RAM의 사용량과 온도 규칙을 각각 저장합니다. 미지원 지표의 설정은 비활성화합니다.</p>
+<p>검증 조건은 <code>Warning &lt; Critical</code>입니다. 사용량은 0~100% 범위, 온도는 섭씨의 유한 숫자로 입력받고 NaN·무한대·빈 값은 거부합니다. 설정 변경 시 현재 유효값의 상태를 즉시 다시 판정합니다. 경계에서 색상이 자주 바뀌는 문제를 관찰하면 후속 단계에서 히스테리시스를 추가합니다.</p>
+<h3>설정 복구</h3>
+<p>파일이 없으면 기본값을 사용합니다. JSON이 깨졌거나 저장된 값이 유효하지 않으면 원본을 보존하고 기본값으로 시작하며 사유를 표시합니다. 저장은 같은 폴더의 임시 파일에 쓴 뒤 교체하는 방식을 사용합니다. 저장 실패 시 성공했다고 표시하지 않습니다.</p>
+</section>
+<section id="lesson"><h2>07 / 앞으로 수업을 진행하는 방법</h2>
+<ol><li><strong>이번 수업의 한 가지 목표:</strong> 눈으로 확인할 결과와 필요한 개념을 먼저 설명합니다.</li><li><strong>파일과 위치 지정:</strong> 프로젝트에서 어느 폴더에 어떤 클래스를 만들고, 기존 코드의 어디에 넣는지 안내합니다. 네임스페이스·using·교체 범위도 함께 적습니다.</li><li><strong>작은 코드 단위 제공:</strong> 학습자가 직접 입력할 수 있는 양으로 나누고 문법과 실행 순서를 설명합니다.</li><li><strong>빌드와 관찰:</strong> 예상 화면·숫자·오류 메시지를 제시하고 직접 실행해 확인합니다.</li><li><strong>이해 확인:</strong> 값을 바꾸거나 알림을 제거하는 작은 실습으로 원리를 확인합니다.</li><li><strong>리뷰 후 다음 단계:</strong> 작성한 코드나 오류 내용을 바탕으로 수정할 부분을 안내합니다. 요청 없이 앱 코드를 대신 수정하지 않습니다.</li></ol>
+<h3>첫 수업의 구체적인 범위</h3>
+<p>Step 0에서 현재 빈 창 실행을 확인한 뒤, Step 1에서 <code>SystemMonitor/MainWindow.xaml</code>의 Grid 안에 CPU 제목·25.0% 텍스트·ProgressBar를 작성합니다. 이때 Binding과 실제 센서 라이브러리는 아직 도입하지 않습니다. 먼저 XAML 레이아웃을 이해한 후 고정 숫자를 ViewModel 속성으로 바꾸는 차이를 경험합니다.</p>
+<h3>완성 후 스스로 답할 질문</h3>
+<ul><li>CPU 값이 바뀌었을 때 화면은 어떤 경로로 갱신되는가?</li><li>가상 서비스를 실제 서비스로 바꿀 때 View를 수정하지 않아도 되는 이유는 무엇인가?</li><li>온도 0°C와 온도 센서 미지원은 데이터에서 어떻게 구분하는가?</li><li>GPU를 하나 더 표시할 때 기존 CPU 코드를 복사하지 않고 확장할 수 있는가?</li><li>수집 중 창을 닫으면 센서 객체와 비동기 루프는 어떻게 종료되는가?</li></ul>
+</section>
+<section id="sources"><h2>08 / 학습 참고 자료와 설계 근거</h2>
+<p class="muted">2026년 10월 26일 확인. 아래는 원리와 센서 공급자에 관한 공식 자료입니다. 수업별 코드는 현재 프로젝트 환경에 맞게 작성합니다.</p>
+<ul><li><a href="https://learn.microsoft.com/en-us/dotnet/desktop/wpf/data/">Microsoft · WPF 데이터 바인딩</a> — Binding과 DataContext의 기본 개념.</li><li><a href="https://learn.microsoft.com/en-us/dotnet/desktop/wpf/data/how-to-implement-property-change-notification">Microsoft · 속성 변경 알림 구현</a> — INotifyPropertyChanged로 화면 갱신하기.</li><li><a href="https://learn.microsoft.com/en-us/dotnet/desktop/wpf/advanced/threading-model">Microsoft · WPF 스레딩 모델</a> — UI Dispatcher와 백그라운드 작업.</li><li><a href="https://github.com/LibreHardwareMonitor/LibreHardwareMonitor">LibreHardwareMonitor · 공식 저장소와 README</a> — 지원 하드웨어, 라이브러리 사용 예, 권한과 라이선스.</li><li><a href="https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core">Microsoft · .NET 지원 정책</a> — 대상 프레임워크 선택 기준.</li></ul>
+</section>
+</main>
+<footer>SystemMonitor · 학습 프로젝트 기획서 v1.0<br>문서의 센서 선택·임계값·수집 간격은 프로젝트 설계안이며, 실제 센서 조사와 학습 결과에 따라 함께 조정합니다.</footer>
+</body>
+</html>

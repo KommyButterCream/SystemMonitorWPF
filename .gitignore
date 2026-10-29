@@ -1,0 +1,33 @@
+# .NET / WPF build outputs
+[Bb]in/
+[Oo]bj/
+[Aa]rtifacts/
+[Pp]ublish/
+
+# Visual Studio per-user settings and caches
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Local source backups and temporary verification tools
+/backups/
+/.verification/
+/.final-check/
+/.review-check/
+/.git-prep/
+
+# Runtime / temporary files (do not exclude source JSON or all DLLs)
+*.tmp
+*.bak
+*.dmp
+/logs/
+
+# Local verification logs; keep the Markdown reports
+/docs/verification-*.log
+/docs/final-check-*.log
+
+# Test results
+TestResults/
+*.trx
